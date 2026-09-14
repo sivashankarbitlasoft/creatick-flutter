@@ -58,6 +58,38 @@ class ApiService {
     return AppUser.fromJson(data as Map<String, dynamic>);
   }
 
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await http.post(
+      _base.replace(path: '/auth/forgot-password'),
+      headers: _headers,
+      body: jsonEncode({'email': email}),
+    );
+    final data = _decodeOrThrow(response);
+    return data is Map<String, dynamic>
+        ? data
+        : Map<String, dynamic>.from(data as Map);
+  }
+
+  static Future<Map<String, dynamic>> verifyForgotPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    final response = await http.post(
+      _base.replace(path: '/auth/forgot-password/veryfy'),
+      headers: _headers,
+      body: jsonEncode({
+        'email': email,
+        'otp': otp,
+        'new_password': newPassword,
+      }),
+    );
+    final data = _decodeOrThrow(response);
+    return data is Map<String, dynamic>
+        ? data
+        : Map<String, dynamic>.from(data as Map);
+  }
+
   // ---------- USER PROFILE ----------
 
   static Future<AppUser> updateProfile({

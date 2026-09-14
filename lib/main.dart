@@ -27,6 +27,10 @@ class TicketApp extends StatelessWidget {
   }
 }
 
+class MyApp extends TicketApp {
+  const MyApp({super.key});
+}
+
 /// Watches auth state and shows the right screen:
 /// - checking   -> splash/loading spinner (first launch, reading local storage)
 /// - loggedOut  -> AuthScreen (login/signup)
