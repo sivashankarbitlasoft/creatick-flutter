@@ -85,6 +85,28 @@ class TicketListNotifier extends StateNotifier<TicketListState> {
       return false;
     }
   }
+
+  Future<bool> deleteTicket(Ticket ticket) async {
+    final ticketNumber = ticket.ticketNumber;
+    if (ticketNumber == null) return false;
+    final previousTickets = state.tickets;
+    state = state.copyWith(
+      tickets: previousTickets.where((t) => t.id != ticket.id).toList(),
+    );
+    try {
+      await ApiService.deleteTicket(ticketNumber);
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(tickets: previousTickets, error: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        tickets: previousTickets,
+        error: 'Could not reach the server. Check your connection.',
+      );
+      return false;
+    }
+  }
 }
 
 final ticketListProvider =

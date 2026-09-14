@@ -14,24 +14,28 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  // Keep all 3 tabs alive in an IndexedStack so switching tabs (or tapping the
-  // FAB) doesn't lose form input or re-fetch data unnecessarily.
-  final _tabs = const [
-    DashboardTab(),
-    CreateTicketTab(),
-    ProfileTab(),
-  ];
+  void _goToTab(int index) => setState(() => _currentIndex = index);
 
   static const _titles = ['Dashboard', 'Create Ticket', 'My Profile'];
 
   @override
   Widget build(BuildContext context) {
+    final tabs = [
+      DashboardTab(onProfileTap: () => _goToTab(2)),
+      const CreateTicketTab(),
+      const ProfileTab(),
+    ];
+
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_currentIndex])),
-      body: IndexedStack(index: _currentIndex, children: _tabs),
+      appBar: _currentIndex == 0
+          ? null
+          : AppBar(title: Text(_titles[_currentIndex])),
+      body: SafeArea(
+        child: IndexedStack(index: _currentIndex, children: tabs),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: _goToTab,
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.dashboard), label: 'Dashboard'),

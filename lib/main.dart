@@ -19,6 +19,7 @@ class TicketApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        scaffoldBackgroundColor: const Color(0xFFF4F5FA),
         useMaterial3: true,
       ),
       home: const AuthGate(),

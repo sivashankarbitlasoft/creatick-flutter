@@ -162,4 +162,14 @@ class ApiService {
     final data = _decodeOrThrow(response);
     return Ticket.fromJson(data as Map<String, dynamic>);
   }
+
+  static Future<void> deleteTicket(String ticketNumber) async {
+    final response = await http.delete(
+      _base.replace(path: '/tickets/$ticketNumber'),
+      headers: _headers,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      _decodeOrThrow(response);
+    }
+  }
 }
