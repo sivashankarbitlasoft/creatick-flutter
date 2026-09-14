@@ -5,7 +5,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/ticket_provider.dart';
 
 class CreateTicketTab extends ConsumerStatefulWidget {
-  const CreateTicketTab({super.key});
+  final VoidCallback? onCreated;
+  const CreateTicketTab({super.key, this.onCreated});
 
   @override
   ConsumerState<CreateTicketTab> createState() => _CreateTicketTabState();
@@ -91,6 +92,8 @@ class _CreateTicketTabState extends ConsumerState<CreateTicketTab> {
         ),
       );
       _clearForm();
+      // Navigate to dashboard tab in the parent HomeScreen (if provided).
+      widget.onCreated?.call();
     } else {
       final error =
           ref.read(ticketListProvider).error ?? 'Could not create ticket';

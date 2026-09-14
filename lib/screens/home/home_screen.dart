@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final tabs = [
       DashboardTab(onProfileTap: () => _goToTab(2)),
-      const CreateTicketTab(),
+    CreateTicketTab(onCreated: () => _goToTab(0)),
       const ProfileTab(),
     ];
 

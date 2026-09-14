@@ -64,28 +64,56 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
-  void _submitLogin() {
-    if (_loginFormKey.currentState!.validate()) {
-      ref.read(authProvider.notifier).login(
-            _loginEmailCtrl.text.trim(),
-            _loginPasswordCtrl.text,
-          );
+  // Returns an error message for the given email value, or null when valid.
+  String? _emailError(String? value, {bool allowPhone = false}) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Email is required';
     }
+    final trimmed = value.trim();
+    if (allowPhone && !trimmed.contains('@')) {
+      // Treat input without '@' as phone number for login flows
+      return null;
+    }
+    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(trimmed)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  void _submitLogin() {
+    if (!_loginFormKey.currentState!.validate()) {
+      final err = _emailError(_loginEmailCtrl.text, allowPhone: true);
+      if (err != null) _showMessage(err);
+      return;
+    }
+
+    ref.read(authProvider.notifier).login(
+      _loginEmailCtrl.text.trim(),
+      _loginPasswordCtrl.text,
+    );
   }
 
   void _submitSignup() {
-    if (_signupFormKey.currentState!.validate()) {
-      ref.read(authProvider.notifier).register(
-            name: _nameCtrl.text.trim(),
-            email: _signupEmailCtrl.text.trim(),
-            phone: _phoneCtrl.text.trim(),
-            password: _signupPasswordCtrl.text,
-          );
+    if (!_signupFormKey.currentState!.validate()) {
+      final err = _emailError(_signupEmailCtrl.text);
+      if (err != null) _showMessage(err);
+      return;
     }
+
+    ref.read(authProvider.notifier).register(
+      name: _nameCtrl.text.trim(),
+      email: _signupEmailCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      password: _signupPasswordCtrl.text,
+    );
   }
 
   Future<void> _submitForgotPasswordRequest() async {
-    if (!_forgotPasswordFormKey.currentState!.validate()) return;
+    if (!_forgotPasswordFormKey.currentState!.validate()) {
+      final err = _emailError(_forgotEmailCtrl.text);
+      if (err != null) _showMessage(err);
+      return;
+    }
 
     setState(() => _forgotPasswordLoading = true);
     try {
