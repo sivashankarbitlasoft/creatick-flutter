@@ -54,6 +54,15 @@ class _CreateTicketTabState extends ConsumerState<CreateTicketTab> {
     });
   }
 
+  String? _validateWebsite(String? value) {
+    // Website / domain is optional but when provided it should be a valid domain or URL.
+    if (value == null || value.trim().isEmpty) return null;
+    final v = value.trim();
+    final regex = RegExp(r'^(https?:\/\/)?((\d{1,3}\.){3}\d{1,3}|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(:\d+)?(\/.*)?$');
+    if (!regex.hasMatch(v)) return 'Enter a valid domain or URL';
+    return null;
+  }
+
   Future<void> _submit() async {
     final formValid = _formKey.currentState!.validate();
     setState(() {
@@ -165,6 +174,7 @@ class _CreateTicketTabState extends ConsumerState<CreateTicketTab> {
                           hintText: 'https://example.com',
                           prefixIcon: Icon(Icons.link_outlined),
                         ),
+                        validator: _validateWebsite,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
