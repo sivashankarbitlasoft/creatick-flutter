@@ -145,26 +145,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   Widget _buildPhoneMockup({required Widget child}) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isCompact = screenWidth < 420;
-
-    return Center(
-      child: Container(
-        width: isCompact ? screenWidth * 0.94 : 420,
-        height: isCompact ? MediaQuery.of(context).size.height * 0.92 : 820,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF4F5FA),
-          borderRadius: BorderRadius.circular(38),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1F000000),
-              blurRadius: 25,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: child,
-      ),
+    // Use a full-screen container without rounded corners or shadows so the
+    // auth screens occupy the entire device area as requested.
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: const Color(0xFFF4F5FA),
+      child: child,
     );
   }
 
@@ -267,211 +254,229 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget _buildForgotPasswordScreen() {
     final showOtpFields = _otpSent;
 
+    // Make the forgot-password screen scrollable so it won't overflow on narrow/short devices.
     return Column(
       children: [
-        const SizedBox(height: 20),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () {
-              setState(() {
-                _showForgotPassword = false;
-                _otpSent = false;
-                _forgotPasswordLoading = false;
-                _forgotEmailCtrl.clear();
-                _otpCtrl.clear();
-                _resetPasswordCtrl.clear();
-                _resetConfirmPasswordCtrl.clear();
-              });
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  SizedBox(width: 6),
-                  Text(
-                    'Back to Login',
-                    style: TextStyle(
-                      color: Color(0xFF2B2D42),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
+        const SizedBox(height: 8),
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      setState(() {
+                        _showForgotPassword = false;
+                        _otpSent = false;
+                        _forgotPasswordLoading = false;
+                        _forgotEmailCtrl.clear();
+                        _otpCtrl.clear();
+                        _resetPasswordCtrl.clear();
+                        _resetConfirmPasswordCtrl.clear();
+                      });
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                          SizedBox(width: 6),
+                          Text(
+                            'Back to Login',
+                            style: TextStyle(
+                              color: Color(0xFF2B2D42),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        const SizedBox(height: 34),
-        Container(
-          width: 112,
-          height: 112,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE7EEFF),
-            borderRadius: BorderRadius.circular(56),
-          ),
-          child: const Icon(
-            Icons.lock_outline_rounded,
-            size: 56,
-            color: Color(0xFF4F6BFF),
-          ),
-        ),
-        const SizedBox(height: 32),
-        const Text(
-          'Forgot Password?',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 42,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF2E3A59),
-            height: 1.1,
-          ),
-        ),
-        const SizedBox(height: 20),
-        const Text(
-          'No worries! Enter your registered email address\nand we\'ll send you a link to reset your password.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF7F8AA3),
-            fontSize: 18,
-            height: 1.4,
-          ),
-        ),
-        const SizedBox(height: 28),
-        if (!showOtpFields)
-          Form(
-            key: _forgotPasswordFormKey,
-            child: _buildAuthTextField(
-              controller: _forgotEmailCtrl,
-              hintText: 'Enter your email address',
-              prefixIcon: Icons.mail_outline_rounded,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Email is required';
-                }
-                final email = value.trim();
-                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-                  return 'Enter a valid email address';
-                }
-                return null;
-              },
-            ),
-          )
-        else
-          Form(
-            key: _otpFormKey,
-            child: Column(
-              children: [
-                _buildAuthTextField(
-                  controller: _otpCtrl,
-                  hintText: 'Enter OTP',
-                  prefixIcon: Icons.pin_rounded,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'OTP is required';
-                    }
-                    if (!RegExp(r'^\d+$').hasMatch(value.trim())) {
-                      return 'OTP must contain only numbers';
-                    }
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 18),
-                _buildAuthTextField(
-                  controller: _resetPasswordCtrl,
-                  hintText: 'New password',
-                  prefixIcon: Icons.lock_outline_rounded,
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
+                const SizedBox(height: 12),
+                Container(
+                  width: 112,
+                  height: 112,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE7EEFF),
+                    borderRadius: BorderRadius.circular(56),
+                  ),
+                  child: const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 56,
+                    color: Color(0xFF4F6BFF),
+                  ),
                 ),
-                const SizedBox(height: 18),
-                _buildAuthTextField(
-                  controller: _resetConfirmPasswordCtrl,
-                  hintText: 'Confirm password',
-                  prefixIcon: Icons.lock_outline_rounded,
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _resetPasswordCtrl.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
+                const SizedBox(height: 24),
+                const Text(
+                  'Forgot Password?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF2E3A59),
+                    height: 1.1,
+                  ),
                 ),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    'No worries! Enter your registered email address and reset your password.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF7F8AA3),
+                      fontSize: 16,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: !showOtpFields
+                      ? Form(
+                          key: _forgotPasswordFormKey,
+                          child: _buildAuthTextField(
+                            controller: _forgotEmailCtrl,
+                            hintText: 'Enter your email address',
+                            prefixIcon: Icons.mail_outline_rounded,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Email is required';
+                              }
+                              final email = value.trim();
+                              if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                  .hasMatch(email)) {
+                                return 'Enter a valid email address';
+                              }
+                              return null;
+                            },
+                          ),
+                        )
+                      : Form(
+                          key: _otpFormKey,
+                          child: Column(
+                            children: [
+                              _buildAuthTextField(
+                                controller: _otpCtrl,
+                                hintText: 'Enter OTP',
+                                prefixIcon: Icons.pin_rounded,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'OTP is required';
+                                  }
+                                  if (!RegExp(r'^\d+$')
+                                      .hasMatch(value.trim())) {
+                                    return 'OTP must contain only numbers';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildAuthTextField(
+                                controller: _resetPasswordCtrl,
+                                hintText: 'New password',
+                                prefixIcon: Icons.lock_outline_rounded,
+                                obscureText: true,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password is required';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildAuthTextField(
+                                controller: _resetConfirmPasswordCtrl,
+                                hintText: 'Confirm password',
+                                prefixIcon: Icons.lock_outline_rounded,
+                                obscureText: true,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please confirm your password';
+                                  }
+                                  if (value != _resetPasswordCtrl.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 22),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: _buildPrimaryButton(
+                    label: showOtpFields ? 'Verify OTP' : 'Send Reset Link',
+                    onPressed: _forgotPasswordLoading
+                        ? null
+                        : (showOtpFields
+                            ? _submitForgotPasswordVerify
+                            : _submitForgotPasswordRequest),
+                    isLoading: _forgotPasswordLoading,
+                    hasArrow: true,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: const [
+                    Expanded(
+                        child:
+                            Divider(color: Color(0xFFCDD5E7), thickness: 1.2)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'Remember your password?',
+                        style:
+                            TextStyle(color: Color(0xFF7F8AA3), fontSize: 15),
+                      ),
+                    ),
+                    Expanded(
+                        child:
+                            Divider(color: Color(0xFFCDD5E7), thickness: 1.2)),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showForgotPassword = false;
+                      _otpSent = false;
+                      _forgotEmailCtrl.clear();
+                      _otpCtrl.clear();
+                      _resetPasswordCtrl.clear();
+                      _resetConfirmPasswordCtrl.clear();
+                    });
+                  },
+                  child: const Text(
+                    'Login →',
+                    style: TextStyle(
+                      color: Color(0xFF4F6BFF),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 28),
               ],
             ),
           ),
-        const SizedBox(height: 28),
-        if (!showOtpFields)
-          _buildPrimaryButton(
-            label: 'Send Reset Link',
-            onPressed:
-                _forgotPasswordLoading ? null : _submitForgotPasswordRequest,
-            isLoading: _forgotPasswordLoading,
-            hasArrow: true,
-          )
-        else
-          _buildPrimaryButton(
-            label: 'Verify OTP',
-            onPressed:
-                _forgotPasswordLoading ? null : _submitForgotPasswordVerify,
-            isLoading: _forgotPasswordLoading,
-            hasArrow: true,
-          ),
-        const SizedBox(height: 26),
-        Row(
-          children: [
-            const Expanded(
-                child: Divider(color: Color(0xFFCDD5E7), thickness: 1.2)),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                'Remember your password?',
-                style: TextStyle(color: Color(0xFF7F8AA3), fontSize: 15),
-              ),
-            ),
-            const Expanded(
-                child: Divider(color: Color(0xFFCDD5E7), thickness: 1.2)),
-          ],
         ),
-        const SizedBox(height: 18),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _showForgotPassword = false;
-              _otpSent = false;
-              _forgotEmailCtrl.clear();
-              _otpCtrl.clear();
-              _resetPasswordCtrl.clear();
-              _resetConfirmPasswordCtrl.clear();
-            });
-          },
-          child: const Text(
-            'Login →',
-            style: TextStyle(
-              color: Color(0xFF4F6BFF),
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-        const SizedBox(height: 22),
       ],
     );
   }
