@@ -76,7 +76,7 @@ class ApiService {
     required String newPassword,
   }) async {
     final response = await http.post(
-      _base.replace(path: '/auth/forgot-password/veryfy'),
+      _base.replace(path: '/auth/forgot-password/verify'),
       headers: _headers,
       body: jsonEncode({
         'email': email,
