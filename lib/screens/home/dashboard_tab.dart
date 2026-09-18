@@ -26,7 +26,6 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
   final Set<String> _selectedStatuses = {};
   final Set<String> _selectedSubDomains = {};
   final Set<String> _selectedAppTypes = {};
-  final Set<String> _selectedTeams = {};
   DateTimeRange? _customRange;
   bool _todaySelected = false;
 
@@ -210,7 +209,6 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
       _selectedStatuses.clear();
       _selectedSubDomains.clear();
       _selectedAppTypes.clear();
-      _selectedTeams.clear();
       _customRange = null;
       _todaySelected = false;
     });
@@ -234,12 +232,6 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
       ..sort();
     final appTypes = state.tickets
         .map((t) => _formatAppType(t.appType))
-        .where((value) => value.trim().isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    final teams = state.tickets
-        .map((t) => t.operatorName)
         .where((value) => value.trim().isNotEmpty)
         .toSet()
         .toList()
@@ -280,11 +272,6 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
           .toList();
     }
 
-    if (_selectedTeams.isNotEmpty) {
-      filtered = filtered
-          .where((t) => _selectedTeams.contains(_normalizeFilterValue(t.operatorName)))
-          .toList();
-    }
 
     if (_todaySelected) {
       final today = DateTime.now();
@@ -319,7 +306,7 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
                 child: TextField(
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search, color: Color(0xFF6B7280)),
-                    hintText: 'Search teams...',
+                    hintText: 'Search...',
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -379,9 +366,13 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childAspectRatio: (filterWidth / 60),
                       children: [
                         _filterTile(
                           width: filterWidth,
@@ -476,21 +467,6 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
                             selected: _selectedAppTypes,
                             onApply: (value) => setState(() {
                               _selectedAppTypes
-                                ..clear()
-                                ..addAll(value);
-                            }),
-                          ),
-                        ),
-                        _filterTile(
-                          width: filterWidth,
-                          label: 'Team',
-                          value: _selectedTeams.isEmpty ? 'All' : '${_selectedTeams.length} selected',
-                          onTap: () => _openMultiSelectDialog(
-                            title: 'Select teams',
-                            options: teams,
-                            selected: _selectedTeams,
-                            onApply: (value) => setState(() {
-                              _selectedTeams
                                 ..clear()
                                 ..addAll(value);
                             }),
