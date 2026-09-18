@@ -64,6 +64,18 @@ class _CreateTicketTabState extends ConsumerState<CreateTicketTab> {
   }
 
   Future<void> _submit() async {
+    final websiteError = _validateWebsite(_websiteCtrl.text);
+    if (websiteError != null) {
+      FocusScope.of(context).unfocus();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(websiteError),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final formValid = _formKey.currentState!.validate();
     setState(() {
       _appTypeError =
@@ -174,7 +186,6 @@ class _CreateTicketTabState extends ConsumerState<CreateTicketTab> {
                           hintText: 'https://example.com',
                           prefixIcon: Icon(Icons.link_outlined),
                         ),
-                        validator: _validateWebsite,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
