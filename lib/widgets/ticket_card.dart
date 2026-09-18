@@ -42,20 +42,26 @@ class _StatusStyle {
 }
 
 _StatusStyle _statusStyle(String status) {
-  switch (status) {
-    case 'in-progress':
-      return const _StatusStyle('In Progress', Color(0xFFB4690E),
-          Color(0xFFFCEBD5), Icons.autorenew_rounded);
-    case 'dev-done':
-      return const _StatusStyle('Dev Done', Color(0xFF2A5FCB),
-          Color(0xFFE1E9FB), Icons.check_circle_outline_rounded);
+  // normalize to a simple key (remove punctuation)
+  final key = status.toLowerCase().replaceAll(RegExp(r"[^a-z0-9]"), '');
+  switch (key) {
+    case 'todo':
+      // todo -> red
+      return const _StatusStyle('To-do', Color(0xFFDC2626), Color(0xFFFFEBEE), Icons.hourglass_empty_rounded);
+    case 'inprogress':
+      // inprogress -> dark blue
+      return const _StatusStyle('In Progress', Color(0xFF1F3A8A), Color(0xFFEAF0FF), Icons.autorenew_rounded);
+    case 'devdone':
+      // devdone -> green
+      return const _StatusStyle('Dev Done', Color(0xFF047857), Color(0xFFE6F6EF), Icons.check_circle_outline_rounded);
     case 'closed':
-      return const _StatusStyle('Closed', Color(0xFF2E9E5B), Color(0xFFE3F6EA),
-          Icons.lock_outline_rounded);
-    case 'to-do':
+      // closed -> purple
+      return const _StatusStyle('Closed', Color(0xFF6D28D9), Color(0xFFF3E8FF), Icons.lock_outline_rounded);
+    case 'reopen':
+      // re-open -> grey
+      return const _StatusStyle('Re-open', Color(0xFF6B7280), Color(0xFFF3F4F6), Icons.refresh_rounded);
     default:
-      return const _StatusStyle('To-do', Color(0xFF5B6472), Color(0xFFEAECF0),
-          Icons.hourglass_empty_rounded);
+      return const _StatusStyle('To-do', Color(0xFFDC2626), Color(0xFFFFEBEE), Icons.hourglass_empty_rounded);
   }
 }
 

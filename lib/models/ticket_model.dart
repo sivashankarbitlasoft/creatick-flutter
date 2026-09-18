@@ -74,4 +74,5 @@ const List<String> kTicketStatuses = [
   'in-progress',
   'dev-done',
   'closed',
+  're-open',
 ];
